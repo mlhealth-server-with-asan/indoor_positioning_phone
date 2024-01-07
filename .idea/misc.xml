@@ -1,0 +1,38 @@
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/D/Android_Studio/app/src/main/res/drawable-v24/edge2.xml" value="0.153" />
+        <entry key="..\:/D/Android_Studio/app/src/main/res/layout/activity_main.xml" value="0.14375" />
+        <entry key="..\:/D/Android_Studio/app/src/main/res/layout/activity_wifi_scan.xml" value="0.14375" />
+        <entry key="..\:/D/WiFi_Positining/app/src/main/res/layout/activity_main.xml" value="0.19610507246376813" />
+        <entry key="..\:/D/WiFi_Positining/app/src/main/res/layout/activity_wifi_scan.xml" value="0.19610507246376813" />
+        <entry key="..\:/D/WiFi_Positining/app/src/main/res/layout/find_location.xml" value="0.19610507246376813" />
+        <entry key="..\:/D/WiFi_Positining/app/src/main/res/layout/login_page.xml" value="0.19610507246376813" />
+        <entry key="..\:/D/WiFi_Positining/app/src/main/res/layout/sudo.xml" value="0.19610507246376813" />
+        <entry key="app/src/main/res/drawable-v24/edge.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-v24/edge2.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-v24/edge3.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-v24/ic_baseline_event_24.xml" value="0.3" />
+        <entry key="app/src/main/res/drawable-v24/ic_launcher_background.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.126" />
+        <entry key="app/src/main/res/drawable-v24/ic_outline_replay_24.xml" value="0.3" />
+        <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.3" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/activity_main2.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_wifi_scan.xml" value="0.28229166666666666" />
+        <entry key="app/src/main/res/layout/find_location.xml" value="0.28229166666666666" />
+        <entry key="app/src/main/res/layout/login_page.xml" value="0.28229166666666666" />
+        <entry key="app/src/main/res/layout/sudo.xml" value="0.33" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2275" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.2275" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="jbr-17" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

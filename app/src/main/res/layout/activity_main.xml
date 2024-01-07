@@ -1,0 +1,76 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/positionResult"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <EditText
+        android:id="@+id/serverAddressInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Server Address"
+        android:minHeight="48dp"
+        android:textSize="18sp"
+        android:inputType="textUri" />
+    <EditText
+        android:id="@+id/positionInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Position"
+        android:inputType="textNoSuggestions"
+        android:minHeight="48dp"
+        android:textSize="18sp" />
+    <EditText
+        android:id="@+id/passwordInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:minHeight="48dp"
+        android:textSize="18sp" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="415dp" >
+        <TextView
+            android:id="@+id/app_log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="WiFi Scan Result" />
+
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/resultText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:gravity="center"
+        android:text="Result Output"
+        android:textSize="18sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/addDatasetBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Add Dataset" />
+
+        <Button
+            android:id="@+id/findPositionBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Find Position" />
+
+    </LinearLayout>
+
+
+</LinearLayout>
