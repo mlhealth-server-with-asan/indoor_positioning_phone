@@ -1,6 +1,8 @@
 package com.example.wifi_positining;
 
-import static android.content.ContentValues.TAG;
+import android.os.Handler;
+import android.os.RemoteException;
+import android.provider.Settings;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -15,6 +17,16 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import org.altbeacon.beacon.Beacon;
+import org.altbeacon.beacon.BeaconConsumer;
+import org.altbeacon.beacon.BeaconData;
+import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.BeaconParser;
+import org.altbeacon.beacon.MonitorNotifier;
+import org.altbeacon.beacon.RangeNotifier;
+import org.altbeacon.beacon.Region;
+
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -33,30 +45,43 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-
+    private BeaconManager beaconManager;
     private EditText serverAddressInput;
     private EditText positionInput;
     private String positionText;
     private TextView resultText;
     private Button addDatasetBtn;
     private Button findPositionBtn;
-
     private WifiManager wifiManager;
-
     private String serverAddress;
     private String URL;
-
     JSONObject one_wifi_json = new JSONObject();
     JSONObject result_json = new JSONObject();
+
+    private HashMap<String, Integer> beaconDataMap = new HashMap<String, Integer>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        // BeaconManager 초기화
+        beaconManager = BeaconManager.getInstanceForApplication(this);
+
+        // iBeacon을 사용하고 있다고 가정
+        beaconManager.getBeaconParsers().add(new BeaconParser().
+                setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
+
+//        beaconManager.bind((BeaconConsumer) this);
+
         Log.d("MainActivity", "앱이 시작되었습니다.");
         serverAddressInput = findViewById(R.id.serverAddressInput);
         addDatasetBtn = findViewById(R.id.addDatasetBtn);
@@ -64,30 +89,9 @@ public class MainActivity extends AppCompatActivity {
         positionInput = findViewById(R.id.positionInput);
         resultText = findViewById(R.id.resultText);
 
+
         IntentFilter filter = new IntentFilter("com.example.wifi_positining.FIND_POSITION");
         registerReceiver(findPositionReceiver, filter);
-
-        if (ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            Log.d("permission","checkSelfPermission");
-            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                Log.d("permission","shouldShowRequestPermissionRationale");
-                // 사용자에게 설명을 보여줍니다.
-                // 권한 요청을 다시 시도합니다.
-            } else {
-                // 권한요청
-                Log.d("permission","권한 요청");
-                ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
-                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_WIFI_STATE,Manifest.permission.CHANGE_WIFI_STATE},
-                        1000);
-            }
-
-        }
 
 
         addDatasetBtn.setOnClickListener(view -> {
@@ -98,8 +102,9 @@ public class MainActivity extends AppCompatActivity {
                 resultText.setText("Please input server address and position");
             } else {
                 URL = serverAddress + "/api/addData";
-                wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                scanWifi();
+                //wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                startBleScanAndProcessData();
+//                scanWifi();
                 addDatasetBtn.setEnabled(false);
                 findPositionBtn.setEnabled(false);
             }
@@ -113,8 +118,9 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 URL = serverAddress + "/findPosition";
                 Log.d("test12", URL);
-                wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                scanWifi();
+//                wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+//                scanWifi();
+                startBleScanAndProcessData();
                 addDatasetBtn.setEnabled(false);
                 findPositionBtn.setEnabled(false);
             }
@@ -123,11 +129,53 @@ public class MainActivity extends AppCompatActivity {
         startForegroundService();
     }
 
+
+    private void startBleScanAndProcessData() {
+        // bleReceiver 등록
+        IntentFilter bleFilter = new IntentFilter("com.example.wifi_positining.BLE_SCAN_RESULT");
+        registerReceiver(bleReceiver, bleFilter);
+
+        // BLE 스캔 시작
+        beaconManager.startRangingBeacons(new Region("myRegion", null, null, null));
+
+        // 2초 후에 스캔 중지 및 결과 방송
+        new Handler().postDelayed(() -> {
+            beaconManager.stopRangingBeacons(new Region("myRegion", null, null, null));
+            // BLE 스캔 결과 방송
+            Intent bleScanResultIntent = new Intent("com.example.wifi_positining.BLE_SCAN_RESULT");
+            // 필요한 경우 여기에 추가 데이터를 넣습니다.
+            sendBroadcast(bleScanResultIntent);
+        }, 2000);
+
+        beaconManager.addRangeNotifier(new RangeNotifier() {
+            @Override
+            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+                for (Beacon beacon : beacons) {
+                    String macAddress = beacon.getBluetoothAddress();
+                    int rssi = beacon.getRssi();
+                    Log.i("asd", "macAddress: " + macAddress + " rssi: " + rssi);
+                    beaconDataMap.put(macAddress, rssi);
+                }
+            }
+        });
+    }
+
+
     @Override
     protected void onStart() {
         super.onStart();
         IntentFilter filter = new IntentFilter("com.example.wifi_positining.FIND_POSITION");
         registerReceiver(findPositionReceiver, filter);
+    }
+
+
+    private String getAndroidId() {
+        try {
+            return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "unknown";
+        }
     }
 
     @Override
@@ -150,7 +198,8 @@ public class MainActivity extends AppCompatActivity {
             URL = serverAddress + "/findPosition";
             Log.d("test12", URL);
             wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            scanWifi();
+            //scanWifi();
+            // startBleScanWithTimeout(30000);
             addDatasetBtn.setEnabled(false);
             findPositionBtn.setEnabled(false);
         }
@@ -164,55 +213,85 @@ public class MainActivity extends AppCompatActivity {
         ContextCompat.startForegroundService(this, serviceIntent);
     }
 
-    private void scanWifi() {
-        registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-        wifiManager.startScan();
-    }
+//    private void scanWifi() {
+//        // Wi-Fi 스캔 시작
+//        registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+//        wifiManager.startScan();
+//    }
 
-    BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
+
+    BroadcastReceiver bleReceiver  = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            List<ScanResult> scanResultList = wifiManager.getScanResults();
+//            List<ScanResult> scanResultList = wifiManager.getScanResults();
             unregisterReceiver(this);
-            // scan result 정렬
-            scanResultList.sort((s1, s2) -> s2.level - s1.level);
-
-
-            TextView logTextView = findViewById(R.id.app_log);
+//            // scan result 정렬
+//            scanResultList.sort((s1, s2) -> s2.level - s1.level);
+//            String androidId = getAndroidId();
+//
+//            TextView logTextView = findViewById(R.id.app_log);
+//            String scanLog = "";
+//            for (ScanResult scanResult : scanResultList) {
+//                scanLog += "BSSID: " + scanResult.BSSID + "  level: " + scanResult.level + "\n";
+//            }
+////            logTextView.setText(scanLog);
+//
+//            // 서버에 보낼 JSON 설정 부분
+//            try {
+//                result_json.put("android_id", androidId);
+//                result_json.put("position", positionText);
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//            JSONArray json_array = new JSONArray();
+//            for (ScanResult scanResult : scanResultList) {
+//                one_wifi_json = new JSONObject();
+//                String bssid = scanResult.BSSID;
+//                int rssi = scanResult.level;
+//
+//                try {
+//                    one_wifi_json.put("bssid", bssid);
+//                    one_wifi_json.put("rssi", rssi);
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//
+//            }
             String scanLog = "";
-            for (ScanResult scanResult : scanResultList) {
-                scanLog += "BSSID: " + scanResult.BSSID + "  level: " + scanResult.level + "\n";
+            JSONArray json_array = new JSONArray();
+            TextView logTextView = findViewById(R.id.app_log);
+            for (Map.Entry<String, Integer> entry : beaconDataMap .entrySet()) {
+                String bssid = entry.getKey(); // 키(주소) 가져오기
+                Integer bleResult = entry.getValue(); // 값(데이터) 가져오기
+
+                // 필요한 작업 수행
+                scanLog += "BSSID: " + bssid + "  level: " + bleResult + "\n";
+                // scanLog를 사용하거나 다른 작업을 수행할 수 있습니다.
             }
             logTextView.setText(scanLog);
 
-            // 서버에 보낼 JSON 설정 부분
-            try {
-                result_json.put("position", positionText);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            JSONArray json_array = new JSONArray();
-            for (ScanResult scanResult : scanResultList) {
-                one_wifi_json = new JSONObject();
-                String bssid = scanResult.BSSID;
-                int rssi = scanResult.level;
+            for (Map.Entry<String, Integer> entry : beaconDataMap .entrySet()) {
 
                 try {
-                    one_wifi_json.put("bssid", bssid);
-                    one_wifi_json.put("rssi", rssi);
+                    one_wifi_json.put("bssid", entry.getKey());
+                    one_wifi_json.put("rssi", entry.getValue());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                json_array.put(one_wifi_json);
             }
+            Log.d("check Log",scanLog);
+
+            json_array.put(one_wifi_json);
             try {
                 result_json.put("wifi_data", json_array);
-
                 EditText passwordText = findViewById(R.id.passwordInput);
                 result_json.put("password", passwordText.getText().toString());
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+
+
 
             // 서버와 통신하는 부분
             try {
@@ -243,6 +322,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     protected Response<String> parseNetworkResponse(NetworkResponse response) { // onResponse 에 넘겨줄 응답을 처리하는 부분
                         String responseString = "";
+
                         if (response != null) {
                             responseString = new String(response.data, StandardCharsets.UTF_8); // 응답 데이터를 변환해주는 부분
                         }

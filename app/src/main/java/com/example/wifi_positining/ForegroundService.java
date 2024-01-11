@@ -29,10 +29,10 @@ public class ForegroundService extends Service {
     private Channel channel;
     private final String TAG = "ForegroundService";
 
-    private final String serverHost = "192.168.45.120"; // RabbitMQ 서버 호스트
+    private final String serverHost = "172.30.1.52"; // RabbitMQ 서버 호스트
     private final int serverPort = 5672; // RabbitMQ 서버 포트
-    private final String username = "guest"; // RabbitMQ 사용자 이름
-    private final String password = "guest"; // RabbitMQ 비밀번호
+    private final String username = "123"; // RabbitMQ 사용자 이름
+    private final String password = "123"; // RabbitMQ 비밀번호
 
     private boolean isAmqpConnected = false;
 
@@ -40,6 +40,7 @@ public class ForegroundService extends Service {
     public void onCreate() {
         super.onCreate();
         startForegroundServiceWithNotification();
+
         // 다른 초기화 작업...
     }
 

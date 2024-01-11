@@ -43,4 +43,5 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation 'com.rabbitmq:amqp-client:5.19.0'
+    implementation 'org.altbeacon:android-beacon-library:2.19.4'
 }
