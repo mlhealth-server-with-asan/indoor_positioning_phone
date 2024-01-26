@@ -5,6 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:layout_marginStart="0dp"
+    android:layout_marginEnd="0dp"
     tools:context=".MainActivity">
 
     <EditText
@@ -31,9 +33,11 @@
         android:inputType="textPassword"
         android:minHeight="48dp"
         android:textSize="18sp" />
+
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="415dp" >
+        android:layout_height="132dp">
+
         <TextView
             android:id="@+id/app_log"
             android:layout_width="match_parent"
@@ -41,6 +45,27 @@
             android:text="WiFi Scan Result" />
 
     </ScrollView>
+
+    <RelativeLayout
+        android:id="@+id/layoutDesignPlan"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/selectedImageView"
+            android:layout_width="match_parent"
+            android:layout_height="318dp"
+            android:contentDescription="@string/image_description" />
+
+
+        <ImageView
+            android:id="@+id/iconImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:src="@drawable/baseline_flag_circle_24"/> <!-- 아이콘 이미지 설정 -->
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/resultText"
@@ -55,6 +80,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/ImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Image" />
 
         <Button
             android:id="@+id/addDatasetBtn"

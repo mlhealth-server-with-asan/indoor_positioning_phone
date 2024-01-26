@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">WiFi_Positining</string>
+    <string name="image_description">선택된 이미지</string>
 </resources>
